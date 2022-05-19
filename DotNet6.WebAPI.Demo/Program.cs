@@ -1,3 +1,6 @@
+using Database.EFCore;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -7,6 +10,30 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+#region CORS
+string[] corsOrigins = builder.Configuration["AllowedHosts"].Split(',', StringSplitOptions.RemoveEmptyEntries);
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        builder =>
+        {
+            if (corsOrigins.Contains("*"))
+            {
+                builder.SetIsOriginAllowed(_ => true);
+            }
+            else
+            {
+                builder.WithOrigins(corsOrigins);
+            }
+            builder.AllowAnyMethod();
+            builder.AllowAnyHeader();
+            builder.AllowCredentials();
+        });
+});
+#endregion
+#region EFCore
+builder.Services.AddDbContext<DemoContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+#endregion
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
