@@ -17,11 +17,11 @@
 
   <ItemGroup>
     <Folder Include="EFCore\" />
-    <Folder Include="Models\DTO\ResultDto\" />
-    <Folder Include="Models\DTO\QueryDto\" />
     <Folder Include="Models\SQLModels\" />
-    <Folder Include="Repository\Implement\" />
-    <Folder Include="Repository\Interface\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Infrastructrue\Infrastructrue.csproj" />
   </ItemGroup>
 
 </Project>

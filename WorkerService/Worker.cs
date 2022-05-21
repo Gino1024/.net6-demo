@@ -28,5 +28,6 @@ namespace WorkerService
             await base.StopAsync(cancellationToken);
 
         }
+        
     }
 }
