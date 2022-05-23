@@ -29,10 +29,18 @@ namespace Service.Service.Implement
             var result = new StandardResponseDto<string>();
             try
             {
-                var a = new { userID = 1 };
-                string tokenValue = _tokenProvider.GenerateToken(a);
+                var user = (await _unitOfWork._userRepository.FindAsNoTrackingAsync(m => m.Account == instance.Email)).FirstOrDefault();
 
-                result.Result = tokenValue;
+                if (user == null || user.Mima != instance.Mima)
+                {
+                    result.Message = "登入失敗";
+                    return result;
+                }
+
+                var claims = new { UserId = user.UserId, UserEmail = user.Account };
+                result.Result = _tokenProvider.GenerateToken(claims);
+                result.Success = true;
+                result.Message = "登入成功";
             }
             catch (Exception ex)
             {
