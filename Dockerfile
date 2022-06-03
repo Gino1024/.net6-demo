@@ -3,13 +3,11 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /source
 
 # copy csproj and restore as distinct layers
-COPY *.sln .
-COPY DotNet6.WebAPI.Demo/*.csproj ./DotNet6.WebAPI.Demo/
-RUN dotnet restore
+COPY . ./DotNet6.WebAPI.Demo/
 
 # copy everything else and build app
-COPY DotNet6.WebAPI.Demo/. ./DotNet6.WebAPI.Demo/
 WORKDIR /source/DotNet6.WebAPI.Demo
+RUN dotnet restore
 RUN dotnet publish -c release -o /app --no-restore
 
 # final stage/image
