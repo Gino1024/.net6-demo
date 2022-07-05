@@ -25,29 +25,30 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 #region Service
-builder.Services.AddScoped<IAccountService,AccountService>();
-builder.Services.AddScoped<ITokenProvider, TokenProvider>(); 
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<ITokenProvider, TokenProvider>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 #endregion
 #region CORS
+string DevCorsPolicy = "DevCorsPolicy";
 string[] corsOrigins = builder.Configuration["AllowedHosts"].Split(',', StringSplitOptions.RemoveEmptyEntries);
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(
-        builder =>
+  options.AddPolicy(DevCorsPolicy,
+      builder =>
+      {
+        if (corsOrigins.Contains("*"))
         {
-            if (corsOrigins.Contains("*"))
-            {
-                builder.SetIsOriginAllowed(_ => true);
-            }
-            else
-            {
-                builder.WithOrigins(corsOrigins);
-            }
-            builder.AllowAnyMethod();
-            builder.AllowAnyHeader();
-            builder.AllowCredentials();
-        });
+          builder.SetIsOriginAllowed(_ => true);
+        }
+        else
+        {
+          builder.WithOrigins(corsOrigins);
+        }
+        builder.AllowAnyMethod();
+        builder.AllowAnyHeader();
+        builder.AllowCredentials();
+      });
 });
 #endregion
 #region EFCore
@@ -61,61 +62,61 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddAutoMapper(config =>
 {
-    config.AddProfile<AutoMapperProfile>();
+  config.AddProfile<AutoMapperProfile>();
 });
 #endregion
 #region Authentication
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+  options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+  options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+  options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
-    options.SaveToken = true;
-    options.RequireHttpsMetadata = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Issuer"],
-        RequireExpirationTime = true,
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("horizonhorizonhorizon2022"))
-    };
+  options.SaveToken = true;
+  options.RequireHttpsMetadata = true;
+  options.TokenValidationParameters = new TokenValidationParameters
+  {
+    ValidateIssuerSigningKey = true,
+    ValidateIssuer = true,
+    ValidateAudience = true,
+    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+    ValidAudience = builder.Configuration["Jwt:Issuer"],
+    RequireExpirationTime = true,
+    ValidateLifetime = true,
+    ClockSkew = TimeSpan.Zero,
+    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("horizonhorizonhorizon2022"))
+  };
 });
 #endregion
 #region OpenAPI Swagger
 builder.Services.AddSwaggerGen(option =>
 {
-    option.SwaggerDoc("v1", new OpenApiInfo
+  option.SwaggerDoc("v1", new OpenApiInfo
+  {
+    Title = "Demo API",
+    Version = "v1",
+    Description = "API",
+    Contact = new OpenApiContact()
     {
-        Title = "Demo API",
-        Version = "v1",
-        Description = "會員功能測試API",
-        Contact = new OpenApiContact()
-        {
-            Name = "Gino"
-        },
-        License = new OpenApiLicense()
-        {
-            Name ="Gino"
-        }
-    });
-    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+      Name = "Gino"
+    },
+    License = new OpenApiLicense()
     {
-        In = ParameterLocation.Header,
-        Description = "Please enter a valid token",
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = "Bearer"
-    });
-    option.AddSecurityRequirement(new OpenApiSecurityRequirement
+      Name = "Gino"
+    }
+  });
+  option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+  {
+    In = ParameterLocation.Header,
+    Description = "Please enter a valid token",
+    Name = "Authorization",
+    Type = SecuritySchemeType.Http,
+    BearerFormat = "JWT",
+    Scheme = "Bearer"
+  });
+  option.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
                 {
                     new OpenApiSecurityScheme
@@ -129,20 +130,21 @@ builder.Services.AddSwaggerGen(option =>
                     new string[]{}
                 }
             });
-    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    option.IncludeXmlComments(xmlPath);
+  var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+  var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+  option.IncludeXmlComments(xmlPath);
 });
 #endregion
 
 var app = builder.Build();
 
+app.UseCors(DevCorsPolicy);
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
 
-    app.UseSwagger();
-    app.UseSwaggerUI();
+  app.UseSwagger();
+  app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
