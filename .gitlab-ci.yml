@@ -1,0 +1,56 @@
+stages:
+  - build
+  
+variables:
+  
+before_script:
+    # - 'which ping || ( apt-get update -y && apt-get install iputils-ping -y )'
+    # - echo "172.23.0.3 gitlab.com" >> /etc/hosts
+    # - ping gitlab.com   
+    #  - git --version
+    #  - "echo $sshPrivateKey"
+    #  - "echo $sshConfig"
+    #  - cat /root/.ssh/id_rsa
+    #  - cat /root/.ssh/config
+
+    # - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    # - whoami
+    # - mkdir -p /root/.ssh
+     - cd ~/.ssh
+     - ls -l
+    # - touch config
+    # - echo -e $sshConfig > ~/.ssh/config
+    # - ls -l
+    # - touch id_rsa
+    # - echo -e $sshPrivateKey > ~/.ssh/id_rsa
+    # - ls -l
+    # - cat config
+    # - cat id_rsa
+    #- echo "172.23.0.3 gitlab.com" >> /etc/hosts
+    
+build:
+  stage: build
+  #image: mcr.microsoft.com/dotnet/sdk:6.0
+  script:
+       - echo  "build start"
+       -  if [ -d "/tmp/test/dotnet6.webapi.demo" ]; then echo "exist"; else mkdir -p /tmp/test ; fi
+       - cd /tmp/test
+       - if [ -d "/tmp/test/dotnet6.webapi.demo" ];  then rm -r dotnet6.webapi.demo; else echo "not exist"; fi
+       - git clone git@gitlab.com:ginoteam/dotnet6.webapi.demo.git
+       - echo "git clone finish"
+       - ls -l
+       - scp -r /tmp/test/dotnet6.webapi.demo    webserver:/home/gino/
+       - ssh  webserver << remotessh
+       - whoami
+       - hostname
+       - cd /home/gino/dotnet6.webapi.demo/DotNet6.WebAPI.Demo
+       - ls -l
+       - export PATH="/home/gino/.dotnet/":$PATH
+       #- dotnet build
+       - if [ -d "/home/gino/app" ];  
+       -     then rm -r -f /home/gino/app ;
+       -          mkdir -p /home/gino/app ; 
+       -     else mkdir /home/gino/app ; 
+       - fi
+       #- dotnet publish --output /home/gino/app/
+    

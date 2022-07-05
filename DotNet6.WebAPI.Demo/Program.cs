@@ -14,6 +14,7 @@ using Microsoft.OpenApi.Models;
 using System.Reflection;
 using Infrastructrue.Implement;
 using Infrastructrue.Interface;
+using DotNet6.WebAPI.Demo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -140,15 +141,22 @@ var app = builder.Build();
 
 app.UseCors(DevCorsPolicy);
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+string isDevelopment = Environment.GetEnvironmentVariable("isDevelopment");
+Console.WriteLine($"isDevelopment={isDevelopment}");
+string test1 = Environment.GetEnvironmentVariable("test1");
+Console.WriteLine($"test1={test1}");
+string test2 = Environment.GetEnvironmentVariable("test2");
+Console.WriteLine($"test2={test2}");
+string test3 = Environment.GetEnvironmentVariable("test3");
+Console.WriteLine($"test3={test3}");
+if (isDevelopment == "1")
 {
-
   app.UseSwagger();
   app.UseSwaggerUI();
 }
+//app.UseHttpsRedirection();
 
-app.UseHttpsRedirection();
-
+app.MigrateDatabase<DemoContext>();
 app.UseAuthentication();
 app.UseAuthorization();
 
